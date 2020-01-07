@@ -1,0 +1,1 @@
+git+git://github.com/MurasakiArtemis/pokemon_commons@v0.1

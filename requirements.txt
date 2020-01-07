@@ -1,1 +1,2 @@
 git+git://github.com/MurasakiArtemis/pokemon_commons@v0.1
+alembic==1.3.2

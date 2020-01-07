@@ -1,8 +1,8 @@
-"""Added first tables
+"""Created first tables
 
-Revision ID: 1bbf71dc2a6b
+Revision ID: 09740f1cd33d
 Revises: 
-Create Date: 2020-01-07 16:26:34.992881
+Create Date: 2020-01-07 16:56:03.504331
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 import sqlalchemy_utils
 
 # revision identifiers, used by Alembic.
-revision = '1bbf71dc2a6b'
+revision = '09740f1cd33d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,28 +21,28 @@ def upgrade():
     op.create_table(
         'pokedex_abilities', sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_abilities'))
     )
     op.create_table(
         'pokedex_egg_group', sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=20), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_egg_group'))
     )
     op.create_table(
         'pokedex_generation', sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=20), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_generation'))
     )
     op.create_table(
         'pokedex_region', sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=20), nullable=False),
         sa.Column('descriptor', sa.String(length=10), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_region'))
     )
     op.create_table(
         'pokedex_type', sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=20), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_type'))
     )
     op.create_table(
         'pokedex_pokemon',
@@ -66,9 +66,13 @@ def upgrade():
         sa.Column('base_friendship', sa.Integer(), nullable=False),
         sa.Column('url', sqlalchemy_utils.types.url.URLType(), nullable=False),
         sa.ForeignKeyConstraint(
-            ['introduced_generation'],
-            ['pokedex_generation.id'],
-        ), sa.PrimaryKeyConstraint('national_dex')
+            ['introduced_generation'], ['pokedex_generation.id'],
+            name=op.
+            f('fk_pokedex_pokemon_introduced_generation_pokedex_generation')
+        ),
+        sa.PrimaryKeyConstraint(
+            'national_dex', name=op.f('pk_pokedex_pokemon')
+        )
     )
     op.create_table(
         'pokedex_form', sa.Column('id', sa.Integer(), nullable=False),
@@ -86,9 +90,9 @@ def upgrade():
             'height', sa.Float(precision=2, asdecimal=True), nullable=False
         ), sa.Column('pokemon_id', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ['pokemon_id'],
-            ['pokedex_pokemon.national_dex'],
-        ), sa.PrimaryKeyConstraint('id')
+            ['pokemon_id'], ['pokedex_pokemon.national_dex'],
+            name=op.f('fk_pokedex_form_pokemon_id_pokedex_pokemon')
+        ), sa.PrimaryKeyConstraint('id', name=op.f('pk_pokedex_form'))
     )
     op.create_table(
         'pokedex_mega_stone_picture',
@@ -97,23 +101,35 @@ def upgrade():
         sa.Column('image_relative_link', sa.String(length=50), nullable=False),
         sa.Column('pokemon_id', sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ['pokemon_id'],
-            ['pokedex_pokemon.national_dex'],
-        ), sa.PrimaryKeyConstraint('id')
+            ['pokemon_id'], ['pokedex_pokemon.national_dex'],
+            name=op.
+            f('fk_pokedex_mega_stone_picture_pokemon_id_pokedex_pokemon')
+        ),
+        sa.PrimaryKeyConstraint(
+            'id', name=op.f('pk_pokedex_mega_stone_picture')
+        )
     )
     op.create_table(
         'pokedex_pokedex_pokemon_pokedex_egg_group',
         sa.Column('pokedex_egg_group_id', sa.Integer(), nullable=False),
         sa.Column('pokedex_pokemon_id', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
-            ['pokedex_egg_group_id'],
-            ['pokedex_egg_group.id'],
+            ['pokedex_egg_group_id'], ['pokedex_egg_group.id'],
+            name=op.f(
+                'fk_pokedex_pokedex_pokemon_pokedex_egg_group_pokedex_egg_group_id_pokedex_egg_group'
+            )
         ),
         sa.ForeignKeyConstraint(
-            ['pokedex_pokemon_id'],
-            ['pokedex_pokemon.national_dex'],
+            ['pokedex_pokemon_id'], ['pokedex_pokemon.national_dex'],
+            name=op.f(
+                'fk_pokedex_pokedex_pokemon_pokedex_egg_group_pokedex_pokemon_id_pokedex_pokemon'
+            )
         ),
-        sa.PrimaryKeyConstraint('pokedex_egg_group_id', 'pokedex_pokemon_id')
+        sa.PrimaryKeyConstraint(
+            'pokedex_egg_group_id',
+            'pokedex_pokemon_id',
+            name=op.f('pk_pokedex_pokedex_pokemon_pokedex_egg_group')
+        )
     )
     op.create_table(
         'pokedex_pokemon_dex',
@@ -121,12 +137,16 @@ def upgrade():
         sa.Column('pokemon_id', sa.Integer(), nullable=False),
         sa.Column('regional_dex', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
-            ['pokemon_id'],
-            ['pokedex_pokemon.national_dex'],
-        ), sa.ForeignKeyConstraint(
-            ['region_id'],
-            ['pokedex_region.id'],
-        ), sa.PrimaryKeyConstraint('region_id', 'pokemon_id')
+            ['pokemon_id'], ['pokedex_pokemon.national_dex'],
+            name=op.f('fk_pokedex_pokemon_dex_pokemon_id_pokedex_pokemon')
+        ),
+        sa.ForeignKeyConstraint(
+            ['region_id'], ['pokedex_region.id'],
+            name=op.f('fk_pokedex_pokemon_dex_region_id_pokedex_region')
+        ),
+        sa.PrimaryKeyConstraint(
+            'region_id', 'pokemon_id', name=op.f('pk_pokedex_pokemon_dex')
+        )
     )
     op.create_table(
         'pokedex_form_ability',
@@ -141,13 +161,18 @@ def upgrade():
                 ('M', 'Mega'),
             ]),
             nullable=False
-        ), sa.ForeignKeyConstraint(
-            ['ability_id'],
-            ['pokedex_abilities.id'],
-        ), sa.ForeignKeyConstraint(
-            ['form_id'],
-            ['pokedex_form.id'],
-        ), sa.PrimaryKeyConstraint('ability_id', 'form_id')
+        ),
+        sa.ForeignKeyConstraint(
+            ['ability_id'], ['pokedex_abilities.id'],
+            name=op.f('fk_pokedex_form_ability_ability_id_pokedex_abilities')
+        ),
+        sa.ForeignKeyConstraint(
+            ['form_id'], ['pokedex_form.id'],
+            name=op.f('fk_pokedex_form_ability_form_id_pokedex_form')
+        ),
+        sa.PrimaryKeyConstraint(
+            'ability_id', 'form_id', name=op.f('pk_pokedex_form_ability')
+        )
     )
     op.create_table(
         'pokedex_form_type',
@@ -160,13 +185,18 @@ def upgrade():
                 ('S', 'Secondary'),
             ]),
             nullable=False
-        ), sa.ForeignKeyConstraint(
-            ['form_id'],
-            ['pokedex_form.id'],
-        ), sa.ForeignKeyConstraint(
-            ['pokemon_type_id'],
-            ['pokedex_type.id'],
-        ), sa.PrimaryKeyConstraint('pokemon_type_id', 'form_id')
+        ),
+        sa.ForeignKeyConstraint(
+            ['form_id'], ['pokedex_form.id'],
+            name=op.f('fk_pokedex_form_type_form_id_pokedex_form')
+        ),
+        sa.ForeignKeyConstraint(
+            ['pokemon_type_id'], ['pokedex_type.id'],
+            name=op.f('fk_pokedex_form_type_pokemon_type_id_pokedex_type')
+        ),
+        sa.PrimaryKeyConstraint(
+            'pokemon_type_id', 'form_id', name=op.f('pk_pokedex_form_type')
+        )
     )
     # ### end Alembic commands ###
 
